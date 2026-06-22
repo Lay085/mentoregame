@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Jogo: Produtividade x Velocidade — Mêntore</title>
+<style>
+  :root {
+    --dark: #0F1C2E;
+    --teal: #00B4A0;
+    --teal-light: #00D4BC;
+    --orange: #E88A2E;
+    --red: #E05C5C;
+    --green: #2DB87A;
+    --white: #F8FAFA;
+    --gray: #8A9BB0;
+    --card-bg: #162232;
+    --border: #1F3347;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--white);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ====== TELA INICIAL ====== */
+  #screen-start {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    text-align: center;
+    background: radial-gradient(ellipse at 30% 20%, rgba(0,180,160,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(232,138,46,0.1) 0%, transparent 50%),
+                var(--dark);
+  }
+
+  .logo-tag {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-tag::before, .logo-tag::after {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 1px;
+    background: var(--teal);
+  }
+
+  .start-title {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+
+  .start-title span { color: var(--teal); }
+
+  .start-subtitle {
+    font-size: 18px;
+    color: var(--gray);
+    max-width: 460px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  .rounds-info {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 44px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .round-badge {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 120px;
+  }
+
+  .round-badge .emoji { font-size: 28px; }
+  .round-badge .label { font-size: 12px; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; }
+  .round-badge .val { font-size: 16px; font-weight: 700; color: var(--white); }
+
+  /* ====== NAME INPUT ====== */
+  .name-input-wrap {
+    width: 100%;
+    max-width: 380px;
+    margin-bottom: 20px;
+  }
+
+  .name-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--teal);
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+
+  .name-input {
+    width: 100%;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+
+  .name-input::placeholder { color: var(--gray); font-weight: 400; }
+
+  .name-input:focus {
+    border-color: var(--teal);
+    background: rgba(0,180,160,0.05);
+  }
+
+  .name-error {
+    color: #F09090;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    color: var(--dark);
+    font-size: 18px;
+    font-weight: 800;
+    padding: 18px 52px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 24px rgba(0,180,160,0.35);
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,180,160,0.5); }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* Admin link */
+  .admin-link {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 11px;
+    color: var(--border);
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    user-select: none;
+    z-index: 50;
+  }
+  .admin-link:hover { color: var(--gray); }
+
+  /* ====== HEADER ====== */
+  .game-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,28,46,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .phase-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--teal);
+    font-weight: 700;
+  }
+
+  .score-display {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .score-display .pts { color: var(--teal); font-size: 18px; }
+
+  .progress-bar {
+    flex: 1;
+    max-width: 200px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--teal-light));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  /* ====== GAME SCREEN ====== */
+  #screen-game { display: none; }
+
+  .game-body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+  }
+
+  /* ====== FASE 1 — QUIZ ====== */
+  .question-counter {
+    font-size: 12px;
+    color: var(--gray);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .question-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 36px 28px;
+    margin-bottom: 24px;
+  }
+
+  .question-text {
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .question-context {
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .question-card { padding: 24px 20px; }
+  }
+
+  .option-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    text-align: left;
+    cursor: pointer;
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    transition: all 0.18s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--teal);
+    background: rgba(0,180,160,0.08);
+  }
+
+  .option-btn .opt-letter {
+    background: var(--border);
+    color: var(--gray);
+    border-radius: 8px;
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+
+  .option-btn:hover:not(:disabled) .opt-letter {
+    background: var(--teal);
+    color: var(--dark);
+  }
+
+  .option-btn.correct {
+    border-color: var(--green);
+    background: rgba(45,184,122,0.12);
+  }
+
+  .option-btn.correct .opt-letter {
+    background: var(--green);
+    color: white;
+  }
+
+  .option-btn.wrong {
+    border-color: var(--red);
+    background: rgba(224,92,92,0.1);
+  }
+
+  .option-btn.wrong .opt-letter {
+    background: var(--red);
+    color: white;
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .feedback-box {
+    margin-top: 16px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    display: none;
+  }
+
+  .feedback-box.correct {
+    background: rgba(45,184,122,0.12);
+    border: 1px solid rgba(45,184,122,0.3);
+    color: #7EDDB1;
+  }
+
+  .feedback-box.wrong {
+    background: rgba(224,92,92,0.1);
+    border: 1px solid rgba(224,92,92,0.25);
+    color: #F09090;
+  }
+
+  .feedback-box strong { color: white; }
+
+  .next-btn {
+    display: none;
+    margin-top: 20px;
+    background: var(--teal);
+    color: var(--dark);
+    font-size: 15px;
+    font-weight: 800;
+    padding: 14px 36px;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .next-btn:hover { background: var(--teal-light); transform: translateY(-1px); }
+
+  /* ====== FASE 2 — CLASSIFICAÇÃO ====== */
+  .sort-instruction {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--gray);
+  }
+
+  .sort-instruction strong { color: var(--white); font-size: 18px; display: block; margin-bottom: 8px; }
+
+  .sort-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 560px) {
+    .sort-columns { grid-template-columns: 1fr; }
+  }
+
+  .sort-zone {
+    border-radius: 16px;
+    padding: 20px;
+    min-height: 200px;
+  }
+
+  .sort-zone.velocidade {
+    background: rgba(232,138,46,0.07);
+    border: 2px dashed rgba(232,138,46,0.35);
+  }
+
+  .sort-zone.produtividade {
+    background: rgba(0,180,160,0.07);
+    border: 2px dashed rgba(0,180,160,0.35);
+  }
+
+  .sort-zone.drag-over {
+    border-style: solid;
+    background: rgba(0,180,160,0.15);
+  }
+
+  .sort-zone-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .velocidade .sort-zone-title { color: var(--orange); }
+  .produtividade .sort-zone-title { color: var(--teal); }
+
+  .sort-items-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 28px;
+    min-height: 60px;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .sort-chip {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 30px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: grab;
+    transition: all 0.15s;
+    user-select: none;
+    color: var(--white);
+  }
+
+  .sort-chip:hover { border-color: var(--teal); background: rgba(0,180,160,0.1); }
+  .sort-chip.dragging { opacity: 0.4; }
+  .sort-chip.correct-chip { background: rgba(45,184,122,0.15); border-color: var(--green); color: #7EDDB1; cursor: default; }
+  .sort-chip.wrong-chip { background: rgba(224,92,92,0.1); border-color: var(--red); color: #F09090; cursor: default; }
+
+  .check-sort-btn {
+    background: var(--teal);
+    color: var(--dark);
+    font-size: 15px;
+    font-weight: 800;
+    padding: 14px 36px;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .check-sort-btn:hover { background: var(--teal-light); transform: translateY(-1px); }
+
+  /* ====== FASE 3 — CENÁRIO ====== */
+  .scenario-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .scenario-header {
+    background: linear-gradient(135deg, rgba(0,180,160,0.15), rgba(0,180,160,0.05));
+    border-bottom: 1px solid var(--border);
+    padding: 20px 28px;
+  }
+
+  .scenario-tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--teal);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .scenario-title { font-size: 20px; font-weight: 700; }
+
+  .scenario-body { padding: 24px 28px; }
+
+  .chat-bubble {
+    background: rgba(255,255,255,0.05);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.7;
+    border-left: 3px solid var(--teal);
+    color: #C8D8E8;
+  }
+
+  .chat-bubble .who {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray);
+    margin-bottom: 6px;
+  }
+
+  .scenario-question {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 24px 0 16px;
+    color: var(--white);
+  }
+
+  .scenario-options { display: flex; flex-direction: column; gap: 10px; }
+
+  .scenario-option {
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    transition: all 0.18s;
+    text-align: left;
+  }
+
+  .scenario-option:hover:not(:disabled) {
+    border-color: var(--teal);
+    background: rgba(0,180,160,0.08);
+  }
+
+  .scenario-option.best { border-color: var(--green); background: rgba(45,184,122,0.12); color: #7EDDB1; }
+  .scenario-option.acceptable { border-color: var(--orange); background: rgba(232,138,46,0.1); color: #F0C080; }
+  .scenario-option.bad { border-color: var(--red); background: rgba(224,92,92,0.1); color: #F09090; }
+
+  /* ====== RESULTADO FINAL ====== */
+  #screen-result {
+    display: none;
+    min-height: 100vh;
+    padding: 60px 20px;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,180,160,0.2) 0%, transparent 70%), var(--dark);
+  }
+
+  .result-trophy {
+    font-size: 80px;
+    margin-bottom: 20px;
+    display: block;
+    animation: pop 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes pop {
+    from { transform: scale(0.3); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .result-title {
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  .result-title span { color: var(--teal); }
+
+  .result-subtitle {
+    font-size: 17px;
+    color: var(--gray);
+    max-width: 480px;
+    margin: 0 auto 44px;
+    line-height: 1.6;
+  }
+
+  .final-score-grid {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 44px;
+  }
+
+  .final-score-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px 32px;
+    min-width: 140px;
+  }
+
+  .final-score-card .big { font-size: 48px; font-weight: 800; color: var(--teal); }
+  .final-score-card .label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
+
+  .insights-block {
+    max-width: 680px;
+    margin: 0 auto 44px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 32px;
+    text-align: left;
+  }
+
+  .insights-block h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--teal);
+    margin-bottom: 16px;
+  }
+
+  .insight-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #A8BCD0;
+  }
+
+  .insight-item .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--teal);
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  .restart-btn {
+    background: transparent;
+    border: 2px solid var(--teal);
+    color: var(--teal);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 14px 44px;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 12px;
+  }
+
+  .restart-btn:hover { background: rgba(0,180,160,0.1); }
+
+  /* ====== TOAST ====== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 14px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.green { border-color: var(--green); color: #7EDDB1; }
+  .toast.red { border-color: var(--red); color: #F09090; }
+  .toast.orange { border-color: var(--orange); color: #F0C080; }
+
+  /* Phase transition */
+  .phase-banner {
+    text-align: center;
+    padding: 40px 20px;
+    margin-bottom: 32px;
+  }
+
+  .phase-banner .phase-num {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .phase-banner .phase-title {
+    font-size: clamp(24px, 4vw, 40px);
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  .phase-banner .phase-desc {
+    color: var(--gray);
+    font-size: 15px;
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .dna-pillars {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .dna-pill {
+    background: rgba(0,180,160,0.1);
+    border: 1px solid rgba(0,180,160,0.3);
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--teal);
+    letter-spacing: 0.5px;
+  }
+
+  /* ====== MODAL DE SENHA ====== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 36px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+  }
+
+  .modal-box h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .modal-box p { font-size: 14px; color: var(--gray); margin-bottom: 28px; }
+
+  .modal-input {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 15px;
+    color: var(--white);
+    font-family: inherit;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+
+  .modal-input:focus { border-color: var(--teal); }
+
+  .modal-error {
+    color: #F09090;
+    font-size: 13px;
+    margin-bottom: 16px;
+    min-height: 18px;
+  }
+
+  .modal-btns { display: flex; gap: 12px; }
+
+  .modal-cancel {
+    flex: 1;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--gray);
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .modal-cancel:hover { border-color: var(--gray); color: var(--white); }
+
+  .modal-confirm {
+    flex: 2;
+    background: var(--teal);
+    color: var(--dark);
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .modal-confirm:hover { background: var(--teal-light); }
+
+  /* ====== PAINEL ADM ====== */
+  #screen-admin {
+    display: none;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .admin-header {
+    background: rgba(15,28,46,0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .admin-header-left { display: flex; align-items: center; gap: 16px; }
+
+  .admin-badge {
+    background: rgba(232,138,46,0.15);
+    border: 1px solid rgba(232,138,46,0.4);
+    color: var(--orange);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+  }
+
+  .admin-title { font-size: 20px; font-weight: 800; }
+
+  .admin-back {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--gray);
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .admin-back:hover { border-color: var(--teal); color: var(--teal); }
+
+  .admin-body {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .admin-stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    text-align: center;
+  }
+
+  .admin-stat-card .num {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--teal);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .admin-stat-card .lbl {
+    font-size: 11px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .admin-section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--teal);
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .admin-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .participants-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .participants-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray);
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+  }
+
+  .participants-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(31,51,71,0.5);
+    vertical-align: middle;
+  }
+
+  .participants-table tr:hover td { background: rgba(0,180,160,0.04); }
+
+  .rank-num {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--gray);
+    width: 40px;
+  }
+
+  .rank-1 { color: #FFD700; }
+  .rank-2 { color: #C0C0C0; }
+  .rank-3 { color: #CD7F32; }
+
+  .participant-name {
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .score-badge {
+    background: rgba(0,180,160,0.12);
+    color: var(--teal);
+    border: 1px solid rgba(0,180,160,0.25);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: 800;
+    display: inline-block;
+  }
+
+  .accuracy-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .accuracy-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    width: 80px;
+    overflow: hidden;
+  }
+
+  .accuracy-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--teal), var(--teal-light));
+  }
+
+  .accuracy-fill.low { background: linear-gradient(90deg, var(--red), #F09090); }
+  .accuracy-fill.mid { background: linear-gradient(90deg, var(--orange), #F0C080); }
+
+  .accuracy-pct { font-size: 13px; font-weight: 700; color: var(--gray); min-width: 36px; }
+
+  .date-cell { font-size: 12px; color: var(--gray); }
+
+  .medal { font-size: 20px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray);
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; display: block; }
+  .empty-state p { font-size: 15px; }
+
+  .admin-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .btn-export {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--gray);
+    padding: 10px 22px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .btn-export:hover { border-color: var(--teal); color: var(--teal); }
+
+  .btn-clear {
+    background: transparent;
+    border: 1.5px solid rgba(224,92,92,0.3);
+    color: var(--red);
+    padding: 10px 22px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.15s;
+    margin-left: auto;
+  }
+
+  .btn-clear:hover { background: rgba(224,92,92,0.08); }
+
+  .table-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TELA INICIAL ===== -->
+<div id="screen-start">
+  <div class="logo-tag">DNA Mêntore · Treinamento de Performance</div>
+  <h1 class="start-title">
+    Produtividade<br><span>x Velocidade</span>
+  </h1>
+  <p class="start-subtitle">Um jogo para o time testar o que aprendeu e descobrir: o que realmente gera resultado no atendimento?</p>
+
+  <div class="rounds-info">
+    <div class="round-badge">
+      <span class="emoji">🧠</span>
+      <span class="label">Fase 1</span>
+      <span class="val">Quiz Rápido</span>
+    </div>
+    <div class="round-badge">
+      <span class="emoji">🗂️</span>
+      <span class="label">Fase 2</span>
+      <span class="val">Classifique</span>
+    </div>
+    <div class="round-badge">
+      <span class="emoji">🎭</span>
+      <span class="label">Fase 3</span>
+      <span class="val">Cenário Real</span>
+    </div>
+  </div>
+
+  <div class="name-input-wrap">
+    <label class="name-label" for="player-name">👤 Seu nome completo</label>
+    <input
+      type="text"
+      id="player-name"
+      class="name-input"
+      placeholder="Digite seu nome para começar..."
+      maxlength="60"
+      autocomplete="off"
+      onkeydown="if(event.key==='Enter') startGame()"
+    />
+    <div class="name-error" id="name-error">⚠️ Por favor, insira seu nome antes de começar.</div>
+  </div>
+
+  <button class="btn-primary" onclick="startGame()">🚀 Começar o Jogo</button>
+
+  <div class="dna-pillars" style="margin-top:48px;">
+    <div class="dna-pill">Análise</div>
+    <div class="dna-pill">Apresentação</div>
+    <div class="dna-pill">Ação</div>
+    <div class="dna-pill">Argumentação</div>
+    <div class="dna-pill">Fechamento</div>
+  </div>
+</div>
+
+<!-- ===== TELA DE JOGO ===== -->
+<div id="screen-game">
+  <header class="game-header">
+    <span class="phase-label" id="header-phase">Fase 1 · Quiz</span>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="score-display">⭐ <span class="pts" id="score-display">0</span> pts</div>
+  </header>
+  <div class="game-body" id="game-body"></div>
+</div>
+
+<!-- ===== RESULTADO FINAL ===== -->
+<div id="screen-result">
+  <span class="result-trophy" id="result-emoji">🏆</span>
+  <h1 class="result-title">Jogo <span id="result-title-text">Concluído!</span></h1>
+  <p class="result-subtitle" id="result-subtitle">Você completou o treinamento de Produtividade x Velocidade!</p>
+
+  <div class="final-score-grid">
+    <div class="final-score-card">
+      <div class="big" id="final-score">0</div>
+      <div class="label">Pontos</div>
+    </div>
+    <div class="final-score-card">
+      <div class="big" id="final-correct">0</div>
+      <div class="label">Acertos</div>
+    </div>
+    <div class="final-score-card">
+      <div class="big" id="final-total">0</div>
+      <div class="label">Questões</div>
+    </div>
+  </div>
+
+  <div class="insights-block">
+    <h3>💡 Lembrete Final — DNA Mêntore</h3>
+    <div class="insight-item"><div class="dot"></div><div><strong>Velocidade ≠ Resultado.</strong> Responder rápido sem análise cria o ciclo destrutivo do retrabalho.</div></div>
+    <div class="insight-item"><div class="dot"></div><div><strong>FCR primeiro.</strong> Investir 2 minutos na primeira resposta elimina 15 minutos de recontatos.</div></div>
+    <div class="insight-item"><div class="dot"></div><div><strong>DNA Mêntore:</strong> Análise → Apresentação → Ação → Argumentação → Fechamento. Em todo atendimento.</div></div>
+    <div class="insight-item"><div class="dot"></div><div><strong>Produtividade real</strong> é entregar resultados consistentes com alto nível de qualidade.</div></div>
+  </div>
+
+  <button class="restart-btn" onclick="restartGame()">🔄 Jogar de Novo</button>
+  <button class="btn-primary" onclick="window.print()">📋 Imprimir Resultado</button>
+</div>
+
+<!-- ===== PAINEL ADM ===== -->
+<div id="screen-admin">
+  <header class="admin-header">
+    <div class="admin-header-left">
+      <span class="admin-badge">ADM</span>
+      <span class="admin-title">Painel de Resultados</span>
+    </div>
+    <button class="admin-back" onclick="closeAdmin()">← Voltar ao Jogo</button>
+  </header>
+  <div class="admin-body" id="admin-body">
+    <!-- preenchido por JS -->
+  </div>
+</div>
+
+<!-- ===== MODAL SENHA ADM ===== -->
+<div class="modal-overlay" id="modal-admin">
+  <div class="modal-box">
+    <h2>🔐 Acesso Restrito</h2>
+    <p>Insira a senha para acessar o painel de resultados dos participantes.</p>
+    <input
+      type="password"
+      class="modal-input"
+      id="admin-pw-input"
+      placeholder="••••••••"
+      onkeydown="if(event.key==='Enter') checkAdminPassword()"
+      autocomplete="off"
+    />
+    <div class="modal-error" id="modal-error"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeAdminModal()">Cancelar</button>
+      <button class="modal-confirm" onclick="checkAdminPassword()">🔓 Entrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Link discreto para ADM -->
+<div class="admin-link" onclick="openAdminModal()" title="Painel ADM">⚙ ADM</div>
+
+<script>
+// ============================================================
+// STORAGE KEY
+// ============================================================
+const STORAGE_KEY = 'mentore-game-results';
+
+function loadResults() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function saveResult(entry) {
+  const results = loadResults();
+  results.push(entry);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(results)); } catch(e) {}
+}
+
+function clearResults() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+}
+
+// ============================================================
+// DADOS DO JOGO
+// ============================================================
+
+const QUIZ = [
+  {
+    q: "Qual é o maior erro operacional no atendimento ao cliente?",
+    ctx: "Pense no que o treinamento chamou de 'O Grande Equívoco'.",
+    opts: ["Demorar muito para responder o cliente","Confundir velocidade de resposta com eficiência final","Não usar as ferramentas do sistema corretamente","Fazer mais atendimentos por dia"],
+    correct: 1,
+    explain: "<strong>Correto!</strong> O maior erro é confundir velocidade inicial com eficiência real. Responder rápido não significa resolver. O resultado de uma má resposta é o ciclo destrutivo do retrabalho."
+  },
+  {
+    q: "O que significa FCR no contexto do atendimento produtivo?",
+    ctx: "É a métrica central da Produtividade, diferente do TMA de Velocidade.",
+    opts: ["First Call Rate — taxa de chamadas no turno","Fast Customer Response — resposta rápida ao cliente","First Contact Resolution — resolução na primeira interação","Full Customer Review — revisão completa do cadastro"],
+    correct: 2,
+    explain: "<strong>Isso!</strong> FCR (First Contact Resolution) é o foco da Produtividade. Já a Velocidade foca em TMA (Tempo Médio de Atendimento). O produtivo resolve na primeira — o rápido cria recontatos."
+  },
+  {
+    q: "No caso prático do treinamento, qual foi o tempo total gasto no atendimento RÁPIDO (Velocidade)?",
+    ctx: "Compare com os 2 minutos do atendimento Produtivo.",
+    opts: ["5 minutos","8 minutos","15 minutos","30 minutos"],
+    correct: 2,
+    explain: "<strong>Exato!</strong> O atendimento rápido de 30 segundos resultou em 2 recontatos e <strong>15 minutos de tempo total</strong>. O produtivo de 2 minutos zerou recontatos e encerrou ali."
+  },
+  {
+    q: "Qual pilar do DNA Mêntore orienta a prática da EMPATIA durante o atendimento?",
+    ctx: "Os pilares são: Análise, Apresentação, Ação, Argumentação e Fechamento.",
+    opts: ["Análise","Apresentação","Ação","Argumentação"],
+    correct: 3,
+    explain: "<strong>Perfeito!</strong> A <strong>Argumentação</strong> é o pilar da empatia: demonstrar que compreende a situação do cliente, reconhecer o ponto de dor e buscar a melhor solução possível."
+  },
+  {
+    q: "Qual é a economia de esforço que o treinamento aponta ao investir mais tempo na primeira resposta?",
+    ctx: "Um número específico foi apresentado no slide de Caso Prático.",
+    opts: ["47%","63%","75%","87%"],
+    correct: 3,
+    explain: "<strong>87%!</strong> Investir mais tempo na primeira resposta evita interações futuras caras e cansativas para o suporte — uma economia de 87% de esforço."
+  },
+  {
+    q: "Qual é o ciclo completo que o retrabalho gera na operação?",
+    ctx: "O 'Ciclo Nocivo' tem 5 etapas bem definidas no treinamento.",
+    opts: ["Pressa → Erro → Retorno → Espera → Queda","Velocidade → Recontato → Churn → Fila → Crise","TMA alto → Erro → Insatisfação → Perda → Queda","Análise falha → Resposta ruim → Retrabalho → Custo"],
+    correct: 0,
+    explain: "<strong>Exatamente!</strong> O Ciclo Nocivo: <strong>1. Pressa</strong> → <strong>2. Erro</strong> → <strong>3. Retorno</strong> → <strong>4. Espera</strong> → <strong>5. Queda</strong>."
+  },
+  {
+    q: "No Fechamento, o que o atendente deve fazer ANTES de encerrar?",
+    ctx: "Um dos pilares do DNA Mêntore — lembra o que ele orienta?",
+    opts: ["Pedir uma avaliação NPS ao cliente","Revisar as informações no sistema para garantir que todas as ações foram feitas","Perguntar se o cliente quer abrir um novo chamado","Transferir para um supervisor para validação"],
+    correct: 1,
+    explain: "<strong>Correto!</strong> Antes de encerrar, o pilar <strong>Fechamento</strong> orienta revisar as informações no sistema para garantir que todas as ações foram realizadas."
+  }
+];
+
+const SORT_ITEMS = [
+  { text: "Foco no TMA (Tempo Médio)", category: "velocidade" },
+  { text: "Análise sistêmica do histórico", category: "produtividade" },
+  { text: "Respostas curtas sem conferência", category: "velocidade" },
+  { text: "Resolução completa na 1ª interação", category: "produtividade" },
+  { text: "Cria recontatos constantes", category: "velocidade" },
+  { text: "Erros mínimos e controle de qualidade", category: "produtividade" },
+  { text: "Risco de dados incorretos", category: "velocidade" },
+  { text: "Reduz custos e retrabalho", category: "produtividade" }
+];
+
+const SCENARIOS = [
+  {
+    title: "O Cliente que Já Voltou Duas Vezes",
+    tag: "Cenário 1 de 2",
+    chat: [{ who: "Cliente", msg: "Oi, já entrei em contato duas vezes essa semana com o mesmo problema e não foi resolvido. Estou muito frustrado. Preciso urgente de ajuda!" }],
+    q: "Como você inicia esse atendimento seguindo o DNA Mêntore?",
+    options: [
+      { text: "🟢 Reconheço a frustração, leio o histórico completo dos atendimentos anteriores antes de responder qualquer coisa, e só então oriento com uma solução definitiva.", type: "best", pts: 30, explain: "✅ <strong>Melhor abordagem!</strong> Demonstra empatia (Argumentação), faz análise do histórico (Análise) e busca resolução definitiva evitando um terceiro recontato." },
+      { text: "🟡 Peço desculpas e respondo rapidamente para ele não esperar mais.", type: "acceptable", pts: 10, explain: "⚠️ <strong>Parcialmente certo.</strong> A empatia é boa, mas responder rapidamente sem analisar o histórico pode gerar um terceiro recontato." },
+      { text: "🔴 Começo a atender como se fosse um chamado novo para agilizar.", type: "bad", pts: 0, explain: "❌ <strong>Evite isso.</strong> Tratar como chamado novo ignora o histórico, forçando o cliente a repetir o relato e perpetuando o Ciclo Nocivo." }
+    ]
+  },
+  {
+    title: "A Fila Está Alta e o Supervisor Cobra Velocidade",
+    tag: "Cenário 2 de 2",
+    chat: [
+      { who: "Supervisor", msg: "Time, a fila está com 80 tickets. Precisamos aumentar a velocidade de resposta agora!" },
+      { who: "Você pensa", msg: "Mas o próximo ticket parece complexo e vai precisar de 3 minutos de análise..." }
+    ],
+    q: "O que você faz?",
+    options: [
+      { text: "🟢 Faço a análise completa dos 3 minutos. Resolver certo agora evita que esse cliente retorne, o que ajudaria mais a fila no longo prazo.", type: "best", pts: 30, explain: "✅ <strong>Pensamento produtivo!</strong> Uma análise de 3 min que evita 2 recontatos de 15 min cada = benefício líquido de 27 min para a fila." },
+      { text: "🟡 Faço um resumo rápido e oriento o básico, priorizando a velocidade pedida pelo supervisor.", type: "acceptable", pts: 10, explain: "⚠️ <strong>Cuidado!</strong> A pressão de fila é real, mas uma resposta incompleta em caso complexo quase certamente gera recontato." },
+      { text: "🔴 Encerro o ticket rapidamente e marco como resolvido para reduzir o número na fila.", type: "bad", pts: 0, explain: "❌ <strong>Nunca faça isso.</strong> Encerrar sem resolver gera recontato imediato e prejudica todos os indicadores de qualidade." }
+    ]
+  }
+];
+
+// ============================================================
+// ESTADO DO JOGO
+// ============================================================
+let playerName = '';
+
+let state = {
+  phase: 1,
+  quizIndex: 0,
+  score: 0,
+  correct: 0,
+  totalQuestions: QUIZ.length + 1 + SCENARIOS.length,
+  answered: 0,
+  sortDone: false,
+  sortScore: 0
+};
+
+let dragItem = null;
+
+function startGame() {
+  const nameInput = document.getElementById('player-name');
+  const nameVal = nameInput.value.trim();
+  if (!nameVal) {
+    document.getElementById('name-error').style.display = 'block';
+    nameInput.focus();
+    return;
+  }
+  document.getElementById('name-error').style.display = 'none';
+  playerName = nameVal;
+  document.getElementById('screen-start').style.display = 'none';
+  document.getElementById('screen-game').style.display = 'block';
+  renderPhase1();
+}
+
+function updateHeader(phaseLabel) {
+  document.getElementById('header-phase').textContent = phaseLabel;
+  document.getElementById('score-display').textContent = state.score;
+  const pct = Math.round((state.answered / state.totalQuestions) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 2200);
+}
+
+// ============================================================
+// FASE 1 — QUIZ
+// ============================================================
+function renderPhase1() {
+  state.phase = 1;
+  updateHeader(`Fase 1 · Quiz — ${state.quizIndex + 1}/${QUIZ.length}`);
+  const body = document.getElementById('game-body');
+  if (state.quizIndex === 0) {
+    body.innerHTML = `
+      <div class="phase-banner">
+        <span class="phase-num">Fase 1 de 3</span>
+        <div class="phase-title">🧠 Quiz Rápido</div>
+        <p class="phase-desc">Olá, <strong>${playerName}</strong>! Teste seus conhecimentos. ${QUIZ.length} perguntas, cada acerto vale 20 pontos!</p>
+      </div>
+    `;
+    setTimeout(() => renderQuestion(), 600);
+  } else {
+    renderQuestion();
+  }
+}
+
+function renderQuestion() {
+  const q = QUIZ[state.quizIndex];
+  const letters = ['A', 'B', 'C', 'D'];
+  document.getElementById('game-body').innerHTML = `
+    <p class="question-counter">Pergunta ${state.quizIndex + 1} de ${QUIZ.length}</p>
+    <div class="question-card">
+      <div class="question-text">${q.q}</div>
+      ${q.ctx ? `<p class="question-context">💡 ${q.ctx}</p>` : ''}
+      <div class="options-grid">
+        ${q.opts.map((opt, i) => `
+          <button class="option-btn" onclick="answerQuiz(${i})" id="opt-${i}">
+            <span class="opt-letter">${letters[i]}</span>${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback-box" id="feedback"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">
+        ${state.quizIndex < QUIZ.length - 1 ? 'Próxima Pergunta →' : 'Ir para Fase 2 →'}
+      </button>
+    </div>
+  `;
+  updateHeader(`Fase 1 · Quiz — ${state.quizIndex + 1}/${QUIZ.length}`);
+}
+
+function answerQuiz(idx) {
+  const q = QUIZ[state.quizIndex];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+  if (idx === q.correct) {
+    btns[idx].classList.add('correct');
+    state.score += 20;
+    state.correct++;
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = '✅ ' + q.explain;
+    showToast('+20 pontos! Correto! 🎉', 'green');
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = '❌ ' + q.explain;
+    showToast('Ops! Resposta incorreta.', 'red');
+  }
+  fb.style.display = 'block';
+  state.answered++;
+  document.getElementById('score-display').textContent = state.score;
+  document.getElementById('next-btn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  state.quizIndex++;
+  if (state.quizIndex < QUIZ.length) {
+    renderQuestion();
+  } else {
+    renderPhase2();
+  }
+}
+
+// ============================================================
+// FASE 2 — CLASSIFICAÇÃO (DRAG & DROP)
+// ============================================================
+let placed = {};
+
+function renderPhase2() {
+  state.phase = 2;
+  placed = {};
+  updateHeader('Fase 2 · Classifique');
+  const shuffled = [...SORT_ITEMS].sort(() => Math.random() - 0.5);
+  document.getElementById('game-body').innerHTML = `
+    <div class="phase-banner">
+      <span class="phase-num">Fase 2 de 3</span>
+      <div class="phase-title">🗂️ Classifique!</div>
+      <p class="phase-desc">Arraste cada característica para o lado correto: Velocidade ou Produtividade.</p>
+    </div>
+    <div class="sort-instruction">
+      <strong>🎯 Como jogar</strong>
+      Arraste os cartões abaixo para a coluna correta. Quando terminar, clique em "Verificar". Cada acerto vale 10 pontos!
+    </div>
+    <div class="sort-items-pool" id="sort-pool">
+      ${shuffled.map(item => {
+        const origIdx = SORT_ITEMS.indexOf(item);
+        return `<div class="sort-chip" draggable="true" id="chip-${origIdx}" data-idx="${origIdx}"
+          ondragstart="dragStart(event)" ondragend="dragEnd(event)">${item.text}</div>`;
+      }).join('')}
+    </div>
+    <div class="sort-columns">
+      <div class="sort-zone velocidade" id="zone-velocidade"
+        ondragover="dragOver(event)" ondrop="dropItem(event,'velocidade')" ondragleave="dragLeave(event)">
+        <div class="sort-zone-title">⚡ Velocidade<br><span style="font-size:10px;font-weight:400;color:var(--gray)">Fazer Rápido</span></div>
+        <div id="dropped-velocidade"></div>
+      </div>
+      <div class="sort-zone produtividade" id="zone-produtividade"
+        ondragover="dragOver(event)" ondrop="dropItem(event,'produtividade')" ondragleave="dragLeave(event)">
+        <div class="sort-zone-title">🎯 Produtividade<br><span style="font-size:10px;font-weight:400;color:var(--gray)">Fazer Certo</span></div>
+        <div id="dropped-produtividade"></div>
+      </div>
+    </div>
+    <button class="check-sort-btn" onclick="checkSort()">✅ Verificar Classificação</button>
+  `;
+}
+
+function dragStart(e) {
+  dragItem = e.target;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', e.target.dataset.idx);
+}
+
+function dragEnd(e) { e.target.classList.remove('dragging'); }
+function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+
+function dropItem(e, zone) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const idx = e.dataTransfer.getData('text/plain');
+  const chip = document.getElementById('chip-' + idx);
+  if (!chip) return;
+  const prev = placed[idx];
+  if (prev) {
+    document.getElementById('dropped-' + prev)?.removeChild(chip);
+  } else {
+    document.getElementById('sort-pool')?.removeChild(chip);
+  }
+  placed[idx] = zone;
+  document.getElementById('dropped-' + zone).appendChild(chip);
+}
+
+function checkSort() {
+  const total = SORT_ITEMS.length;
+  const poolChips = document.getElementById('sort-pool').querySelectorAll('.sort-chip');
+  if (poolChips.length > 0) { showToast('Classifique todos os itens primeiro!', 'orange'); return; }
+  let correct = 0;
+  Object.entries(placed).forEach(([idx, zone]) => {
+    const chip = document.getElementById('chip-' + idx);
+    if (SORT_ITEMS[idx].category === zone) { chip.classList.add('correct-chip'); correct++; }
+    else { chip.classList.add('wrong-chip'); }
+    chip.draggable = false;
+  });
+  const pts = correct * 10;
+  state.score += pts;
+  state.sortScore = pts;
+  state.correct += correct;
+  state.answered += 1;
+  document.getElementById('score-display').textContent = state.score;
+  showToast(`${correct}/${total} corretos! +${pts} pontos`, correct >= 6 ? 'green' : 'orange');
+  setTimeout(() => {
+    document.querySelector('.check-sort-btn').innerHTML = `🎯 ${correct}/${total} corretos! Ir para Fase 3 →`;
+    document.querySelector('.check-sort-btn').onclick = renderPhase3;
+  }, 1200);
+}
+
+// ============================================================
+// FASE 3 — CENÁRIOS
+// ============================================================
+let scenarioIndex = 0;
+
+function renderPhase3() {
+  state.phase = 3;
+  scenarioIndex = 0;
+  renderScenario();
+}
+
+function renderScenario() {
+  const s = SCENARIOS[scenarioIndex];
+  updateHeader(`Fase 3 · Cenário ${scenarioIndex + 1}/${SCENARIOS.length}`);
+  document.getElementById('game-body').innerHTML = `
+    ${scenarioIndex === 0 ? `
+    <div class="phase-banner">
+      <span class="phase-num">Fase 3 de 3</span>
+      <div class="phase-title">🎭 Cenário Real</div>
+      <p class="phase-desc">Agora é hora de aplicar o DNA Mêntore. Leia o cenário e escolha a melhor ação.</p>
+    </div>` : ''}
+    <div class="scenario-card">
+      <div class="scenario-header">
+        <div class="scenario-tag">${s.tag}</div>
+        <div class="scenario-title">${s.title}</div>
+      </div>
+      <div class="scenario-body">
+        ${s.chat.map(c => `<div class="chat-bubble"><div class="who">${c.who}</div>${c.msg}</div>`).join('')}
+        <div class="scenario-question">${s.q}</div>
+        <div class="scenario-options">
+          ${s.options.map((opt, i) => `
+            <button class="scenario-option" onclick="answerScenario(${i})" id="sopt-${i}">${opt.text}</button>
+          `).join('')}
+        </div>
+        <div class="feedback-box" id="scenario-fb"></div>
+        <button class="next-btn" id="scenario-next" onclick="nextScenario()">
+          ${scenarioIndex < SCENARIOS.length - 1 ? 'Próximo Cenário →' : 'Ver Resultado Final →'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function answerScenario(idx) {
+  const s = SCENARIOS[scenarioIndex];
+  const opt = s.options[idx];
+  const btns = document.querySelectorAll('.scenario-option');
+  btns.forEach(b => b.disabled = true);
+  const btn = document.getElementById('sopt-' + idx);
+  btn.classList.add(opt.type === 'best' ? 'best' : opt.type === 'acceptable' ? 'acceptable' : 'bad');
+  const fb = document.getElementById('scenario-fb');
+  fb.className = 'feedback-box ' + (opt.type === 'best' ? 'correct' : 'wrong');
+  fb.innerHTML = opt.explain;
+  fb.style.display = 'block';
+  state.score += opt.pts;
+  if (opt.type === 'best') state.correct++;
+  state.answered++;
+  document.getElementById('score-display').textContent = state.score;
+  const toastType = opt.type === 'best' ? 'green' : opt.type === 'acceptable' ? 'orange' : 'red';
+  const toastMsg = opt.type === 'best' ? `+${opt.pts} pts! Excelente! 🌟` : opt.type === 'acceptable' ? `+${opt.pts} pts. Pode melhorar!` : 'Atenção! Opção incorreta.';
+  showToast(toastMsg, toastType);
+  document.getElementById('scenario-next').style.display = 'inline-block';
+}
+
+function nextScenario() {
+  scenarioIndex++;
+  if (scenarioIndex < SCENARIOS.length) {
+    renderScenario();
+  } else {
+    showResult();
+  }
+}
+
+// ============================================================
+// RESULTADO FINAL
+// ============================================================
+function showResult() {
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'block';
+
+  const total = QUIZ.length + SCENARIOS.length + 1;
+  const pct = Math.round((state.correct / total) * 100);
+
+  let emoji = '🏆', titleText = 'Incrível!', subtitle = 'Você domina o DNA Mêntore. Está pronto para aplicar no atendimento!';
+  if (pct < 50) {
+    emoji = '📚'; titleText = 'Continue Praticando!'; subtitle = 'Revise o conteúdo do treinamento e tente novamente. Você consegue!';
+  } else if (pct < 75) {
+    emoji = '💪'; titleText = 'Bom Trabalho!'; subtitle = 'Você já entende bem o conceito. Foque nos pontos que errou!';
+  }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title-text').textContent = titleText;
+  document.getElementById('result-subtitle').textContent = subtitle;
+  document.getElementById('final-score').textContent = state.score;
+  document.getElementById('final-correct').textContent = state.correct;
+  document.getElementById('final-total').textContent = total;
+
+  // Salvar resultado localmente
+  const entry = {
+    name: playerName,
+    score: state.score,
+    correct: state.correct,
+    total: total,
+    pct: pct,
+    date: new Date().toISOString()
+  };
+  saveResult(entry);
+
+  // Enviar para Google Sheets via GET (contorna bloqueio CORS do Apps Script)
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz_YAVTGqKoT-fc0X-tsYjwyNBHoEpU4fW7hL2mwFV3P8D9JSj2AlcaNlZa66pRWzww/exec';
+  const params = new URLSearchParams({
+    name: entry.name,
+    score: entry.score,
+    correct: entry.correct,
+    total: entry.total,
+    pct: entry.pct,
+    date: new Date().toLocaleString('pt-BR')
+  });
+  const img = new Image();
+  img.src = SHEETS_URL + '?' + params.toString();
+}
+
+function restartGame() {
+  state = { phase: 1, quizIndex: 0, score: 0, correct: 0, totalQuestions: QUIZ.length + 1 + SCENARIOS.length, answered: 0, sortDone: false, sortScore: 0 };
+  playerName = '';
+  document.getElementById('player-name').value = '';
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-start').style.display = 'flex';
+}
+
+// ============================================================
+// PAINEL ADM
+// ============================================================
+const ADMIN_PASSWORD = 'treinamentoprod2026';
+
+function openAdminModal() {
+  document.getElementById('modal-admin').classList.add('active');
+  document.getElementById('admin-pw-input').value = '';
+  document.getElementById('modal-error').textContent = '';
+  setTimeout(() => document.getElementById('admin-pw-input').focus(), 100);
+}
+
+function closeAdminModal() {
+  document.getElementById('modal-admin').classList.remove('active');
+}
+
+function checkAdminPassword() {
+  const pw = document.getElementById('admin-pw-input').value;
+  if (pw === ADMIN_PASSWORD) {
+    closeAdminModal();
+    openAdmin();
+  } else {
+    document.getElementById('modal-error').textContent = '❌ Senha incorreta. Tente novamente.';
+    document.getElementById('admin-pw-input').value = '';
+    document.getElementById('admin-pw-input').focus();
+  }
+}
+
+function openAdmin() {
+  // Esconder todas as telas ativas
+  document.getElementById('screen-start').style.display = 'none';
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-admin').style.display = 'block';
+  renderAdminPanel();
+}
+
+function closeAdmin() {
+  document.getElementById('screen-admin').style.display = 'none';
+  document.getElementById('screen-start').style.display = 'flex';
+}
+
+function renderAdminPanel() {
+  const results = loadResults();
+  const sorted = [...results].sort((a, b) => b.score - a.score);
+  const body = document.getElementById('admin-body');
+
+  const totalParticipants = results.length;
+  const avgScore = totalParticipants > 0 ? Math.round(results.reduce((s, r) => s + r.score, 0) / totalParticipants) : 0;
+  const avgPct = totalParticipants > 0 ? Math.round(results.reduce((s, r) => s + r.pct, 0) / totalParticipants) : 0;
+  const topScore = totalParticipants > 0 ? Math.max(...results.map(r => r.score)) : 0;
+
+  body.innerHTML = `
+    <div class="admin-stats">
+      <div class="admin-stat-card">
+        <div class="num">${totalParticipants}</div>
+        <div class="lbl">Participantes</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="num">${avgScore}</div>
+        <div class="lbl">Pontuação Média</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="num">${avgPct}%</div>
+        <div class="lbl">Acerto Médio</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="num">${topScore}</div>
+        <div class="lbl">Maior Pontuação</div>
+      </div>
+    </div>
+
+    <div class="admin-section-title">🏅 Ranking de Participantes</div>
+
+    <div class="admin-actions">
+      <button class="btn-export" onclick="exportCSV()">📥 Exportar CSV</button>
+      <button class="btn-clear" onclick="confirmClear()">🗑️ Limpar Dados</button>
+    </div>
+
+    <div class="table-wrap">
+      ${totalParticipants === 0 ? `
+        <div class="empty-state">
+          <span class="icon">📋</span>
+          <p>Nenhum resultado registrado ainda.<br>Os dados aparecem aqui após a conclusão do jogo.</p>
+        </div>
+      ` : `
+        <table class="participants-table">
+          <thead>
+            <tr>
+              <th style="width:50px">#</th>
+              <th>Participante</th>
+              <th>Pontuação</th>
+              <th>Acertos</th>
+              <th>Aproveitamento</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sorted.map((r, i) => {
+              const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+              const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+              const fillClass = r.pct < 50 ? 'low' : r.pct < 75 ? 'mid' : '';
+              const dateObj = new Date(r.date);
+              const dateStr = dateObj.toLocaleDateString('pt-BR') + ' ' + dateObj.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+              return `
+                <tr>
+                  <td><span class="rank-num ${rankClass}">${medal || (i + 1)}</span></td>
+                  <td><span class="participant-name">${escHtml(r.name)}</span></td>
+                  <td><span class="score-badge">⭐ ${r.score} pts</span></td>
+                  <td style="font-weight:700">${r.correct}/${r.total}</td>
+                  <td>
+                    <div class="accuracy-bar-wrap">
+                      <div class="accuracy-bar"><div class="accuracy-fill ${fillClass}" style="width:${r.pct}%"></div></div>
+                      <span class="accuracy-pct">${r.pct}%</span>
+                    </div>
+                  </td>
+                  <td class="date-cell">${dateStr}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `}
+    </div>
+  `;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function exportCSV() {
+  const results = loadResults();
+  if (results.length === 0) { showToast('Sem dados para exportar.', 'orange'); return; }
+  const sorted = [...results].sort((a, b) => b.score - a.score);
+  const header = ['Posição','Nome','Pontuação','Acertos','Total Questões','Aproveitamento (%)','Data'];
+  const rows = sorted.map((r, i) => {
+    const dateStr = new Date(r.date).toLocaleString('pt-BR');
+    return [i+1, r.name, r.score, r.correct, r.total, r.pct, dateStr].join(';');
+  });
+  const csv = [header.join(';'), ...rows].join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `resultados-mentore-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exportado com sucesso!', 'green');
+}
+
+function confirmClear() {
+  if (confirm('Tem certeza que deseja apagar TODOS os resultados? Esta ação não pode ser desfeita.')) {
+    clearResults();
+    renderAdminPanel();
+    showToast('Dados apagados.', 'orange');
+  }
+}
+
+// Fechar modal clicando fora
+document.getElementById('modal-admin').addEventListener('click', function(e) {
+  if (e.target === this) closeAdminModal();
+});
+</script>
+</body>
+</html>
